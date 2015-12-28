@@ -1,0 +1,10 @@
+source 'https://github.com/CocoaPods/Specs.git'
+platform :ios, '8.0'
+use_frameworks!
+
+pod 'SnapKit', '~> 0.18.0’
+pod 'Alamofire', '~> 3.1.4'
+pod 'RealmSwift', '~> 0.97.0'
+pod 'SwiftyJSON', '~> 2.3.2'
+pod 'YALSideMenu', '~> 1.2.0'
+pod 'PySwiftyRegex', '~> 0.2.0'
