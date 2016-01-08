@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		4452F51C1C3E4F500094C03B /* d7.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = 4452F51A1C3E4F500094C03B /* d7.mp3 */; };
+		4452F51D1C3E4F500094C03B /* d4.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = 4452F51B1C3E4F500094C03B /* d4.mp3 */; };
 		44BD7EE01C3B6A17000E5197 /* CoreLocation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 44BD7EDF1C3B6A17000E5197 /* CoreLocation.framework */; };
 		44BE82881C3A60070086DAC8 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 44BE82871C3A60070086DAC8 /* AppDelegate.swift */; };
 		44BE828A1C3A60070086DAC8 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 44BE82891C3A60070086DAC8 /* ViewController.swift */; };
@@ -16,6 +18,8 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		4452F51A1C3E4F500094C03B /* d7.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; name = d7.mp3; path = ../d7.mp3; sourceTree = "<group>"; };
+		4452F51B1C3E4F500094C03B /* d4.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; name = d4.mp3; path = ../d4.mp3; sourceTree = "<group>"; };
 		44BD7EDF1C3B6A17000E5197 /* CoreLocation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreLocation.framework; path = System/Library/Frameworks/CoreLocation.framework; sourceTree = SDKROOT; };
 		44BE82841C3A60070086DAC8 /* Mlife.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Mlife.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		44BE82871C3A60070086DAC8 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
@@ -38,6 +42,16 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		4452F5191C3E4F390094C03B /* Audio */ = {
+			isa = PBXGroup;
+			children = (
+				4452F51A1C3E4F500094C03B /* d7.mp3 */,
+				4452F51B1C3E4F500094C03B /* d4.mp3 */,
+			);
+			name = Audio;
+			path = ..;
+			sourceTree = "<group>";
+		};
 		44BE827B1C3A60070086DAC8 = {
 			isa = PBXGroup;
 			children = (
@@ -58,6 +72,7 @@
 		44BE82861C3A60070086DAC8 /* Mlife */ = {
 			isa = PBXGroup;
 			children = (
+				4452F5191C3E4F390094C03B /* Audio */,
 				44BE82871C3A60070086DAC8 /* AppDelegate.swift */,
 				44BE82891C3A60070086DAC8 /* ViewController.swift */,
 				44BE828B1C3A60070086DAC8 /* Main.storyboard */,
@@ -126,9 +141,11 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				4452F51D1C3E4F500094C03B /* d4.mp3 in Resources */,
 				44BE82921C3A60070086DAC8 /* LaunchScreen.storyboard in Resources */,
 				44BE828F1C3A60070086DAC8 /* Assets.xcassets in Resources */,
 				44BE828D1C3A60070086DAC8 /* Main.storyboard in Resources */,
+				4452F51C1C3E4F500094C03B /* d7.mp3 in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -254,6 +271,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				INFOPLIST_FILE = Mlife/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 8.1;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.buzz.Mlife;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -265,6 +283,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				INFOPLIST_FILE = Mlife/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 8.1;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.buzz.Mlife;
 				PRODUCT_NAME = "$(TARGET_NAME)";

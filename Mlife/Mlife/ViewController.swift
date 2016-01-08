@@ -9,6 +9,7 @@
 import UIKit
 import WebKit
 import CoreLocation
+import AVFoundation
 
 class ViewController: UIViewController, WKUIDelegate, WKNavigationDelegate, CLLocationManagerDelegate {
 	
@@ -23,13 +24,29 @@ class ViewController: UIViewController, WKUIDelegate, WKNavigationDelegate, CLLo
 	var openning : Bool = false
 	
 	var wk: WKWebView!
+	var progressView = UIProgressView()
 	
 	let proximityUUID = NSUUID(UUIDString: "23A01AF0-232A-4518-9C0E-323FB773F5EF")
 	var region = CLBeaconRegion()
 	let manager = CLLocationManager()
 	
+	var audioPlayer = AVAudioPlayer()
+	
 	override func viewDidLoad() {
 		super.viewDidLoad()
+		// d4.mp3,d7.mp3
+		let path = NSBundle.mainBundle().pathForResource("d4", ofType: "mp3")
+		print("path:\(path)")
+		do {
+			audioPlayer = try AVAudioPlayer(contentsOfURL: NSURL(fileURLWithPath: path!))
+			let session = AVAudioSession.sharedInstance()
+			do {
+				try session.setCategory(AVAudioSessionCategoryPlayback)
+			}
+			audioPlayer.play()
+		} catch {
+			
+		}
 	}
 	
 	override func didReceiveMemoryWarning() {
@@ -77,14 +94,65 @@ class ViewController: UIViewController, WKUIDelegate, WKNavigationDelegate, CLLo
 				})
 		}
 		
-		self.wk = WKWebView(frame: self.view.frame)
+		// self.wk = WKWebView(frame: self.view.frame)
+		let navItem = UINavigationItem()
+		navItem.leftBarButtonItem = UIBarButtonItem(title: "Prev", style: .Done, target: self, action: "previousPage")
+		navItem.rightBarButtonItem = UIBarButtonItem(title: "Next", style: .Done, target: self, action: "nextPage")
+		let navBar = UINavigationBar(frame: CGRectMake(0, 20, self.view.frame.width, 40))
+		navBar.items?.append(navItem)
+		self.view.addSubview(navBar)
+		self.wk = WKWebView(frame: CGRectMake(0, 60, self.view.frame.width, self.view.frame.height))
 		self.wk.loadRequest(NSURLRequest(URL: NSURL(string: "https://mlife.mo")!))
 		self.view.addSubview(self.wk)
+		
+		self.progressView = UIProgressView(progressViewStyle: .Default)
+		self.progressView.frame.size.width = self.view.frame.size.width
+		self.progressView.backgroundColor = UIColor.redColor()
+		self.view.addSubview(self.progressView)
+		
+		// self.navigationItem.leftBarButtonItem = UIBarButtonItem(title: "Prev", style: .Done, target: self, action: "previousPage")
+		// self.navigationItem.rightBarButtonItem = UIBarButtonItem(title: "Next", style: .Done, target: self, action: "nextPage")
+		
+		// 监听支持KVO的属性
+		self.wk.addObserver(self, forKeyPath: "loading", options: .New, context: nil)
+		self.wk.addObserver(self, forKeyPath: "title", options: .New, context: nil)
+		self.wk.addObserver(self, forKeyPath: "estimatedProgress", options: .New, context: nil)
 		
 		wk.UIDelegate = self
 		wk.navigationDelegate = self
 		
 		testNSThread()
+	}
+	
+	// MARK: - KVO
+	override func observeValueForKeyPath(keyPath: String?, ofObject object: AnyObject?, change: [String : AnyObject]?, context: UnsafeMutablePointer<Void>) {
+		if keyPath == "loading" {
+			print("loading")
+		} else if keyPath == "title" {
+			self.title = self.wk.title
+		} else if keyPath == "estimatedProgress" {
+			print(wk.estimatedProgress)
+			self.progressView.setProgress(Float(wk.estimatedProgress), animated: true)
+		}
+		
+		// 已经完成加载时，我们就可以做我们的事了
+		if !wk.loading {
+			UIView.animateWithDuration(0.55, animations: {() -> Void in
+					self.progressView.alpha = 0.0;
+				})
+		}
+	}
+	
+	func previousPage() {
+		if self.wk.canGoBack {
+			self.wk.goBack()
+		}
+	}
+	
+	func nextPage() {
+		if self.wk.canGoForward {
+			self.wk.goForward()
+		}
 	}
 	
 	func webView(webView: WKWebView,
@@ -207,7 +275,8 @@ class ViewController: UIViewController, WKUIDelegate, WKNavigationDelegate, CLLo
 				print("openning:\(self.openning)")
 				if (!self.openning) {
 					self.openning = true
-					let routeUrl = "https://mlife.mo/#wineanddine;Id=4"
+					// let routeUrl = "https://mlife.mo/#wineanddine;Id=4"
+					let routeUrl = "http://storypixel.com/lab/blinkwang/"
 					self.wk.loadRequest(NSURLRequest(URL: NSURL(string: routeUrl)!))
 				}
 				else if (self.openning && wk.URL?.absoluteString == "https://mlife.mo/#") {
