@@ -22,6 +22,10 @@ class ViewController: UIViewController, WKUIDelegate, WKNavigationDelegate, CLLo
 	var distance : String = ""
 	var doOpen : Bool = false
 	var openning : Bool = false
+	let dic: Dictionary < String, (String, String) > = [
+		"2397-4": ("https://mlife.mo/#wineanddine;Id=4", "d4.mp3"),
+		"2397-7": ("https://mlife.mo/#wineanddine;Id=7", "d7.mp3"),
+	]
 	
 	var wk: WKWebView!
 	var progressView = UIProgressView()
@@ -32,20 +36,54 @@ class ViewController: UIViewController, WKUIDelegate, WKNavigationDelegate, CLLo
 	
 	var audioPlayer = AVAudioPlayer()
 	
+	let activityIndicator = UIActivityIndicatorView(activityIndicatorStyle: UIActivityIndicatorViewStyle.WhiteLarge)
+	
 	override func viewDidLoad() {
 		super.viewDidLoad()
-		// d4.mp3,d7.mp3
-		let path = NSBundle.mainBundle().pathForResource("d4", ofType: "mp3")
-		print("path:\(path)")
-		do {
-			audioPlayer = try AVAudioPlayer(contentsOfURL: NSURL(fileURLWithPath: path!))
-			let session = AVAudioSession.sharedInstance()
-			do {
-				try session.setCategory(AVAudioSessionCategoryPlayback)
-			}
-			audioPlayer.play()
-		} catch {
+	}
+	
+	func playAudio(fileFullName: String, playAction: Bool = true) {
+		if (fileFullName != "#") {
+			/*
+			 let findRange = fileFullName.rangeOfString(".")
+			 let findRangeStartIndex = findRange?.startIndex
+			 let findRangeEndIndex = findRange?.endIndex
+			 let startIndex = fileFullName.startIndex
+			 let endIndex = fileFullName.endIndex
+			 let rangeLeft = Range<String.Index>(start: startIndex, end: findRangeStartIndex!)
+			 let rangeRight = Range<String.Index>(start: findRangeEndIndex!, end: endIndex)
+			 let fileName = fileFullName.substringWithRange(rangeLeft)
+			 let fileExt = fileFullName.substringWithRange(rangeRight)
+			 let _fileExt = fileFullName.substringFromIndex(findRangeEndIndex!)
+
+			 print("fileName.fileExt=\(fileName).\(fileExt)_.\(_fileExt)")
+			 */
 			
+			let arr = fileFullName.componentsSeparatedByString(".") ;
+			// print("fileName.fileExt=\(arr[0]).\(arr[1])")
+			
+			let path = NSBundle.mainBundle().pathForResource(arr[0], ofType: arr[1])
+			// print("path:\(path)")
+			do {
+				audioPlayer = try AVAudioPlayer(contentsOfURL: NSURL(fileURLWithPath: path!))
+				let session = AVAudioSession.sharedInstance()
+				do {
+					try session.setCategory(AVAudioSessionCategoryPlayback)
+				}
+				if (playAction) {
+					if (audioPlayer.playing) {
+						audioPlayer.stop() ;
+					}
+					audioPlayer.play()
+				}
+				else {
+					if (audioPlayer.playing) {
+						audioPlayer.stop()
+					}
+				}
+			} catch {
+				
+			}
 		}
 	}
 	
@@ -95,20 +133,29 @@ class ViewController: UIViewController, WKUIDelegate, WKNavigationDelegate, CLLo
 		}
 		
 		// self.wk = WKWebView(frame: self.view.frame)
-		let navItem = UINavigationItem()
-		navItem.leftBarButtonItem = UIBarButtonItem(title: "Prev", style: .Done, target: self, action: "previousPage")
-		navItem.rightBarButtonItem = UIBarButtonItem(title: "Next", style: .Done, target: self, action: "nextPage")
-		let navBar = UINavigationBar(frame: CGRectMake(0, 20, self.view.frame.width, 40))
-		navBar.items?.append(navItem)
-		self.view.addSubview(navBar)
-		self.wk = WKWebView(frame: CGRectMake(0, 60, self.view.frame.width, self.view.frame.height))
+		/*
+		 let navItem = UINavigationItem()
+		 navItem.leftBarButtonItem = UIBarButtonItem(title: "Prev", style: .Done, target: self, action: "previousPage")
+		 navItem.rightBarButtonItem = UIBarButtonItem(title: "Next", style: .Done, target: self, action: "nextPage")
+		 let navBar = UINavigationBar(frame: CGRectMake(0, 20, self.view.frame.width, 40))
+		 navBar.items?.append(navItem)
+		 self.view.addSubview(navBar)*/
+		
+		self.wk = WKWebView(frame: CGRectMake(0, 0, self.view.frame.width, self.view.frame.height))
 		self.wk.loadRequest(NSURLRequest(URL: NSURL(string: "https://mlife.mo")!))
 		self.view.addSubview(self.wk)
 		
-		self.progressView = UIProgressView(progressViewStyle: .Default)
-		self.progressView.frame.size.width = self.view.frame.size.width
-		self.progressView.backgroundColor = UIColor.redColor()
-		self.view.addSubview(self.progressView)
+		// progressView
+		/*
+		 self.progressView = UIProgressView(progressViewStyle: .Bar)
+		 self.progressView.frame.size.width = self.view.frame.size.width
+		 self.progressView.tintColor = UIColor.cyanColor()
+		 self.progressView.transform = CGAffineTransformMakeScale(1.0,10.0)
+		 self.view.addSubview(self.progressView)*/
+		
+		self.activityIndicator.center = self.view.center
+		self.activityIndicator.color = UIColor.brownColor()
+		self.view.addSubview(activityIndicator) ;
 		
 		// self.navigationItem.leftBarButtonItem = UIBarButtonItem(title: "Prev", style: .Done, target: self, action: "previousPage")
 		// self.navigationItem.rightBarButtonItem = UIBarButtonItem(title: "Next", style: .Done, target: self, action: "nextPage")
@@ -128,11 +175,13 @@ class ViewController: UIViewController, WKUIDelegate, WKNavigationDelegate, CLLo
 	override func observeValueForKeyPath(keyPath: String?, ofObject object: AnyObject?, change: [String : AnyObject]?, context: UnsafeMutablePointer<Void>) {
 		if keyPath == "loading" {
 			print("loading")
+			self.activityIndicator.stopAnimating() ;
 		} else if keyPath == "title" {
 			self.title = self.wk.title
 		} else if keyPath == "estimatedProgress" {
 			print(wk.estimatedProgress)
-			self.progressView.setProgress(Float(wk.estimatedProgress), animated: true)
+			// self.progressView.setProgress(Float(wk.estimatedProgress), animated: true)
+			self.activityIndicator.startAnimating() ;
 		}
 		
 		// 已经完成加载时，我们就可以做我们的事了
@@ -268,6 +317,11 @@ class ViewController: UIViewController, WKUIDelegate, WKNavigationDelegate, CLLo
 		myThread.start()
 	}
 	
+	func loadUrl(id: String) {
+		let routeUrl = "https://mlife.mo/#wineanddine;Id=\(id)"
+		self.wk.loadRequest(NSURLRequest(URL: NSURL(string: routeUrl)!))
+	}
+	
 	func threadInMainMethod(sender : AnyObject) {
 		while (true) {
 			if (self.doOpen) {
@@ -275,9 +329,7 @@ class ViewController: UIViewController, WKUIDelegate, WKNavigationDelegate, CLLo
 				print("openning:\(self.openning)")
 				if (!self.openning) {
 					self.openning = true
-					// let routeUrl = "https://mlife.mo/#wineanddine;Id=4"
-					let routeUrl = "http://storypixel.com/lab/blinkwang/"
-					self.wk.loadRequest(NSURLRequest(URL: NSURL(string: routeUrl)!))
+					loadUrl("4")
 				}
 				else if (self.openning && wk.URL?.absoluteString == "https://mlife.mo/#") {
 					self.openning = false
