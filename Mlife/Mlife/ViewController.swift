@@ -22,6 +22,8 @@ class ViewController: UIViewController, WKUIDelegate, WKNavigationDelegate, CLLo
 	var distance : String = ""
 	var doOpen : Bool = false
 	var openning : Bool = false
+	var targetItem : (String, String)?
+	var currentItem : (String, String)?
 	let dic: Dictionary < String, (String, String) > = [
 		"2397-4": ("https://mlife.mo/#wineanddine;Id=4", "d4.mp3"),
 		"2397-7": ("https://mlife.mo/#wineanddine;Id=7", "d7.mp3"),
@@ -42,49 +44,55 @@ class ViewController: UIViewController, WKUIDelegate, WKNavigationDelegate, CLLo
 		super.viewDidLoad()
 	}
 	
-	func playAudio(fileFullName: String, playAction: Bool = true) {
-		if (fileFullName != "#") {
-			/*
-			 let findRange = fileFullName.rangeOfString(".")
-			 let findRangeStartIndex = findRange?.startIndex
-			 let findRangeEndIndex = findRange?.endIndex
-			 let startIndex = fileFullName.startIndex
-			 let endIndex = fileFullName.endIndex
-			 let rangeLeft = Range<String.Index>(start: startIndex, end: findRangeStartIndex!)
-			 let rangeRight = Range<String.Index>(start: findRangeEndIndex!, end: endIndex)
-			 let fileName = fileFullName.substringWithRange(rangeLeft)
-			 let fileExt = fileFullName.substringWithRange(rangeRight)
-			 let _fileExt = fileFullName.substringFromIndex(findRangeEndIndex!)
+	func playAudio(fileFullName: String) {
+		/*
+		 let findRange = fileFullName.rangeOfString(".")
+		 let findRangeStartIndex = findRange?.startIndex
+		 let findRangeEndIndex = findRange?.endIndex
+		 let startIndex = fileFullName.startIndex
+		 let endIndex = fileFullName.endIndex
+		 let rangeLeft = Range<String.Index>(start: startIndex, end: findRangeStartIndex!)
+		 let rangeRight = Range<String.Index>(start: findRangeEndIndex!, end: endIndex)
+		 let fileName = fileFullName.substringWithRange(rangeLeft)
+		 let fileExt = fileFullName.substringWithRange(rangeRight)
+		 let _fileExt = fileFullName.substringFromIndex(findRangeEndIndex!)
 
-			 print("fileName.fileExt=\(fileName).\(fileExt)_.\(_fileExt)")
-			 */
-			
-			let arr = fileFullName.componentsSeparatedByString(".") ;
-			// print("fileName.fileExt=\(arr[0]).\(arr[1])")
-			
-			let path = NSBundle.mainBundle().pathForResource(arr[0], ofType: arr[1])
-			// print("path:\(path)")
+		 print("fileName.fileExt=\(fileName).\(fileExt)_.\(_fileExt)")
+		 */
+		
+		let arr = fileFullName.componentsSeparatedByString(".") ;
+		// print("fileName.fileExt=\(arr[0]).\(arr[1])")
+		
+		let path = NSBundle.mainBundle().pathForResource(arr[0], ofType: arr[1])
+		// print("path:\(path)")
+		do {
+			audioPlayer = try AVAudioPlayer(contentsOfURL: NSURL(fileURLWithPath: path!))
+			let session = AVAudioSession.sharedInstance()
 			do {
-				audioPlayer = try AVAudioPlayer(contentsOfURL: NSURL(fileURLWithPath: path!))
-				let session = AVAudioSession.sharedInstance()
-				do {
-					try session.setCategory(AVAudioSessionCategoryPlayback)
-				}
-				if (playAction) {
-					if (audioPlayer.playing) {
-						audioPlayer.stop() ;
-					}
-					audioPlayer.play()
-				}
-				else {
-					if (audioPlayer.playing) {
-						audioPlayer.stop()
-					}
-				}
-			} catch {
-				
+				try session.setCategory(AVAudioSessionCategoryPlayback)
 			}
+			
+			if (audioPlayer.playing) {
+				audioPlayer.stop()
+			}
+			
+			audioPlayer.play()
+			
+		} catch {
+			
 		}
+		
+	}
+	
+	func stopAudio() {
+		let session = AVAudioSession.sharedInstance()
+		do {
+			try session.setCategory(AVAudioSessionCategoryPlayback)
+			audioPlayer.stop()
+		} catch {
+			
+		}
+		
 	}
 	
 	override func didReceiveMemoryWarning() {
@@ -174,20 +182,24 @@ class ViewController: UIViewController, WKUIDelegate, WKNavigationDelegate, CLLo
 	// MARK: - KVO
 	override func observeValueForKeyPath(keyPath: String?, ofObject object: AnyObject?, change: [String : AnyObject]?, context: UnsafeMutablePointer<Void>) {
 		if keyPath == "loading" {
-			print("loading")
-			self.activityIndicator.stopAnimating() ;
+			// print("loading")
 		} else if keyPath == "title" {
 			self.title = self.wk.title
 		} else if keyPath == "estimatedProgress" {
-			print(wk.estimatedProgress)
+			// print(wk.estimatedProgress)
 			// self.progressView.setProgress(Float(wk.estimatedProgress), animated: true)
-			self.activityIndicator.startAnimating() ;
+			self.activityIndicator.startAnimating()
 		}
 		
 		// 已经完成加载时，我们就可以做我们的事了
 		if !wk.loading {
 			UIView.animateWithDuration(0.55, animations: {() -> Void in
-					self.progressView.alpha = 0.0;
+					// self.progressView.alpha = 0.0
+					self.activityIndicator.stopAnimating()
+					if let item = self.currentItem {
+						self.playAudio(item.1)
+						self.currentItem = nil
+					}
 				})
 		}
 	}
@@ -210,7 +222,7 @@ class ViewController: UIViewController, WKUIDelegate, WKNavigationDelegate, CLLo
 		windowFeatures: WKWindowFeatures) -> WKWebView? {
 		if navigationAction.targetFrame == nil {
 			let url = navigationAction.request.URL!
-			print(url.absoluteString)
+			// print(url.absoluteString)
 			// webView.loadRequest(NSURLRequest(URL: url))
 			let desc = url.description.lowercaseString
 			if (desc.rangeOfString("http://") != nil
@@ -267,15 +279,10 @@ class ViewController: UIViewController, WKUIDelegate, WKNavigationDelegate, CLLo
 		
 		for b in beacons {
 			let uniqueId = "\(b.major)-\(b.minor)"
-			if (uniqueId == "2397-4") {
+			
+			if let item = dic[uniqueId] {
 				if (b.proximity == CLProximity.Immediate) {
-					self.doOpen = true
-					print("doOpen:\(self.doOpen)")
-					break
-				}
-				else {
-					self.doOpen = false
-					print("doOpen:\(self.doOpen)")
+					self.targetItem = item
 					break
 				}
 			}
@@ -312,27 +319,31 @@ class ViewController: UIViewController, WKUIDelegate, WKNavigationDelegate, CLLo
 	}
 	
 	func testNSThread() {
-		// 方式二
 		let myThread = NSThread(target: self, selector: "threadInMainMethod:", object: nil)
 		myThread.start()
 	}
 	
-	func loadUrl(id: String) {
-		let routeUrl = "https://mlife.mo/#wineanddine;Id=\(id)"
-		self.wk.loadRequest(NSURLRequest(URL: NSURL(string: routeUrl)!))
+	func loadUrl(url: String) {
+		self.currentItem = self.targetItem
+		if (url != self.wk.URL?.absoluteString) {
+			self.wk.loadRequest(NSURLRequest(URL: NSURL(string: url)!))
+		}
+		// print("loadUrl:\(url)")
 	}
 	
 	func threadInMainMethod(sender : AnyObject) {
 		while (true) {
-			if (self.doOpen) {
-				sleep(1)
-				print("openning:\(self.openning)")
-				if (!self.openning) {
-					self.openning = true
-					loadUrl("4")
-				}
-				else if (self.openning && wk.URL?.absoluteString == "https://mlife.mo/#") {
-					self.openning = false
+			
+			sleep(1)
+			
+			if (self.targetItem != nil) {
+				loadUrl(self.targetItem!.0)
+				self.targetItem = nil
+			}
+			
+			if (wk.URL?.absoluteString == "https://mlife.mo/#") {
+				if (audioPlayer.playing) {
+					stopAudio()
 				}
 			}
 		}
