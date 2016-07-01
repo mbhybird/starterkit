@@ -25,8 +25,8 @@ class ViewController: UIViewController, WKUIDelegate, WKNavigationDelegate, CLLo
 	var targetItem : (String, String)?
 	var currentItem : (String, String)?
 	let dic: Dictionary < String, (String, String) > = [
-		"2397-4": ("https://mlife.mo/#wineanddine;Id=4", "d4.mp3"),
-		"2397-7": ("https://mlife.mo/#wineanddine;Id=7", "d7.mp3"),
+		"2397-301": ("https://mlife.mo/#wineanddine;Id=4", "d4.mp3"),
+		"2397-305": ("https://mlife.mo/#wineanddine;Id=7", "d7.mp3"),
 	]
 	
 	var wk: WKWebView!
